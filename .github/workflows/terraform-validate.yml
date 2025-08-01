@@ -49,12 +49,12 @@ jobs:
           exit 1
         fi
         echo "outputs.tf is present in module root."
-    
+
     - name: Terraform Fmt
       run: terraform fmt -check -recursive -diff
-  
+
     - name: Terraform Init
       run: terraform init
-  
+
     - name: Terraform Validate
       run: terraform validate
