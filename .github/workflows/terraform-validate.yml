@@ -1,0 +1,56 @@
+name: Terraform Validate
+
+run-name: ${{ github.actor }} - ${{ github.ref_name }}
+
+on:
+  pull_request:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+jobs:
+  terraform_validate:
+    name: "Format and Validate Code"
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.8.4
+
+    - name: Check module definition
+      run: |
+        if ! grep -q 'module "resource_group_storage"' main.tf; then
+          echo "Module 'resource_group_storage' not found in main.tf!"
+          exit 1
+        fi
+        echo "Module 'resource_group_storage' is present in main.tf."
+
+    - name: Check variables definition in module
+      run: |
+        if ! ls modules/resource_group_storage | grep -q 'variables.tf'; then
+          echo "variables.tf not found in module 'resource_group_storage'!"
+          exit 1
+        fi
+        echo "variables.tf is present in module 'resource_group_storage'."
+
+    - name: Check outputs definition in module
+      run: |
+        if ! ls modules/resource_group_storage | grep -q 'outputs.tf'; then
+          echo "outputs.tf not found in module 'resource_group_storage'!"
+          exit 1
+        fi
+        echo "outputs.tf is present in module 'resource_group_storage'."
+    
+    - name: Terraform Fmt
+      run: terraform fmt -check -recursive -diff
+  
+    - name: Terraform Init
+      run: terraform init
+  
+    - name: Terraform Validate
+      run: terraform validate
